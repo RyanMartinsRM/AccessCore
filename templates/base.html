@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AccessCore{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fluent.css') }}">
+    
+    <style>
+        /* --- Variáveis de Cores --- */
+        :root {
+            /* Padrão (Light) */
+            --bg-body: #f3f2f1;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #323130;
+            --text-secondary: #605e5c;
+            --border-color: #e1dfdd;
+            --input-bg: #ffffff;
+            --hover-color: #f3f2f1;
+        }
+
+        /* Definições do Modo Escuro */
+        body.dark-mode {
+            --bg-body: #121212;
+            --bg-sidebar: #1f1f1f;
+            --bg-card: #2d2d2d;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --border-color: #444444;
+            --input-bg: #333333;
+            --hover-color: #3d3d3d;
+        }
+
+        /* --- APLICAÇÃO GLOBAL --- */
+        body {
+            background-color: var(--bg-body) !important;
+            color: var(--text-primary) !important;
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--bg-sidebar) !important;
+            border-right: 1px solid var(--border-color) !important;
+        }
+        .sidebar a {
+            color: var(--text-primary) !important;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background-color: var(--hover-color) !important;
+        }
+
+        /* Áreas de Conteúdo e Tabelas */
+        /* Isso aqui resolve o problema do fundo branco */
+        .content-area, .card, .tab-content, .container, .box {
+            background-color: var(--bg-body) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Tabelas Estilo Escuro */
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--bg-card) !important; /* Fundo da tabela */
+        }
+        table.data-table th {
+            background-color: var(--bg-sidebar) !important;
+            color: var(--text-primary) !important;
+            border-bottom: 2px solid var(--border-color);
+            text-align: left;
+            padding: 10px;
+        }
+        table.data-table td {
+            background-color: var(--bg-card) !important;
+            color: var(--text-primary) !important;
+            border-bottom: 1px solid var(--border-color) !important;
+            padding: 10px;
+        }
+
+        /* Inputs */
+        input, select, textarea, .form-control {
+            background-color: var(--input-bg) !important;
+            color: var(--text-primary) !important;
+            border: 1px solid var(--border-color) !important;
+        }
+
+        /* Cabeçalho Superior */
+        .content-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        .content-header-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Botão de Tema */
+        .theme-toggle-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        .theme-toggle-btn:hover {
+            background-color: var(--hover-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <nav class="sidebar">
+            <div class="sidebar-header">AccessCore</div>
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('dashboard') }}" class="{{ 'active' if request.endpoint == 'dashboard' else '' }}">Dashboard</a></li>
+                <li><a href="{{ url_for('usuarios') }}" class="{{ 'active' if request.endpoint == 'usuarios' else '' }}">Usuários</a></li>
+                <li><a href="{{ url_for('dispositivos') }}" class="{{ 'active' if request.endpoint == 'dispositivos' else '' }}">Dispositivos</a></li>
+                <li><a href="{{ url_for('relatorios') }}" class="{{ 'active' if request.endpoint == 'relatorios' else '' }}">Relatórios</a></li>
+                {% if session.is_admin %}
+                <li><a href="{{ url_for('configuracoes') }}" class="{{ 'active' if request.endpoint in ('configuracoes', 'editar_nivel_acesso') else '' }}">Configurações Gerais</a></li>
+                {% endif %}
+                <li><a href="{{ url_for('sobre') }}" class="{{ 'active' if request.endpoint == 'sobre' else '' }}">Sobre</a></li>
+            </ul>
+            <div style="margin-top: auto; padding: 20px; border-top: 1px solid var(--border-color);">
+                <small>Logado como: {{ session.username }}</small><br>
+                <a href="{{ url_for('logout') }}" style="color: #d13438 !important;">Sair</a>
+            </div>
+        </nav>
+
+        <main class="content-area">
+            <div class="content-header-top">
+                <div class="content-header-title">
+                    {% if request.endpoint == 'dashboard' %}Status Geral do Sistema
+                    {% elif request.endpoint == 'usuarios' %}Gerenciamento de Usuários
+                    {% elif request.endpoint == 'dispositivos' %}Gerenciamento de Dispositivos
+                    {% else %}AccessCore{% endif %}
+                </div> 
+                <button id="theme-toggle" class="theme-toggle-btn">
+                    <span id="theme-icon">🌙</span> <span id="theme-text">Modo Escuro</span>
+                </button>
+            </div>
+
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // --- Lógica do TEMA (Independente do Gráfico) ---
+        const toggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const themeText = document.getElementById('theme-text');
+        const body = document.body;
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                body.classList.add('dark-mode');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Modo Claro';
+            } else {
+                body.classList.remove('dark-mode');
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Modo Escuro';
+            }
+            // Tenta atualizar o gráfico se ele existir, mas não trava se falhar
+            try { if (typeof updateChartColors === 'function') updateChartColors(); } catch (e) { console.log('Sem gráfico aqui'); }
+        }
+
+        // Carregar preferência
+        const currentTheme = localStorage.getItem('theme');
+        applyTheme(currentTheme || 'light');
+
+        // Clique no botão
+        toggleBtn.addEventListener('click', () => {
+            const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+    </script>
+</body>
+</html>

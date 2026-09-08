@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios - AccessCore{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Estilização das Abas */
+    .tabs-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+        padding: 10px 20px;
+        background-color: transparent;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: var(--text-secondary);
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .tab-btn:hover {
+        color: var(--text-primary);
+        background-color: var(--hover-color);
+    }
+
+    .tab-btn.active {
+        color: #0078d4;
+        border-bottom: 3px solid #0078d4;
+    }
+
+    /* Estilo dos Cards de Relatório (CORREÇÃO AQUI) */
+    .report-card {
+        background-color: var(--bg-card); /* Usa a variável do tema */
+        color: var(--text-primary);       /* Usa a variável do tema */
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .report-card h4 {
+        margin-top: 0;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+    }
+
+    .user-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .user-list li {
+        padding: 5px 0;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .user-list li:last-child {
+        border-bottom: none;
+    }
+    
+    /* Pequeno ponto colorido antes do nome */
+    .bullet {
+        height: 8px;
+        width: 8px;
+        background-color: #0078d4;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    /* Tabelas */
+    .table-responsive {
+        overflow-x: auto;
+        background-color: var(--bg-card);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        padding: 10px;
+    }
+</style>
+
+<h2 style="margin-bottom: 20px;">Relatórios do Sistema</h2>
+
+<div class="tabs-container">
+    <button class="tab-btn active" onclick="openTab(event, 'tab-logs')">Logs de Acesso</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-auditoria')">Auditoria do Sistema</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-niveis')">Níveis e Usuários</button>
+    <button class="tab-btn" onclick="openTab(event, 'tab-sem-nivel')">Usuários sem Nível</button>
+</div>
+
+<div id="tab-logs" class="tab-content-area">
+    <div class="table-responsive">
+        <table class="data-table" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Pessoa</th>
+                    <th>Dispositivo</th>
+                    <th>Direção</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.data_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td><strong>{{ log.pessoa.nome_completo }}</strong></td>
+                    <td>{{ log.dispositivo.nome_local }}</td>
+                    <td>{{ log.direcao }}</td>
+                    <td>
+                        <span style="color: {{ '#107c10' if log.status_acesso == 'Permitido' else '#d13438' }}; font-weight: bold;">
+                            {{ log.status_acesso }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if not logs %}
+                <tr><td colspan="5" style="text-align: center; padding: 20px;">Nenhum registro encontrado.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="tab-auditoria" class="tab-content-area" style="display: none;">
+    <div class="table-responsive">
+        <table class="data-table" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Operador</th>
+                    <th>Ação</th>
+                    <th>Descrição</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs_de_auditoria %}
+                <tr>
+                    <td style="white-space: nowrap;">{{ log.data_hora.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>{{ log.operador.username }}</td>
+                    <td style="font-weight: bold; color: #0078d4;">{{ log.acao }}</td>
+                    <td>{{ log.descricao }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="tab-niveis" class="tab-content-area" style="display: none;">
+    <h3>Pessoas por Nível de Acesso</h3>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        {% for nivel in niveis_com_pessoas %}
+        <div class="report-card">
+            <h4>
+                {{ nivel.nome }} 
+                <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: normal;">
+                    ({{ nivel.descricao or 'Sem descrição' }})
+                </span>
+            </h4>
+            
+            <ul class="user-list">
+                {% for pessoa in nivel.pessoas %}
+                <li><span class="bullet"></span> {{ pessoa.nome_completo }}</li>
+                {% endfor %}
+                
+                {% if not nivel.pessoas %}
+                <li style="color: var(--text-secondary); font-style: italic;">Nenhum usuário neste nível.</li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div id="tab-sem-nivel" class="tab-content-area" style="display: none;">
+    <div class="report-card" style="border-left: 5px solid #d13438;">
+        <h4 style="color: #d13438;">⚠️ Usuários sem Permissão de Acesso</h4>
+        <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--text-secondary);">
+            Estes usuários estão cadastrados mas não pertencem a nenhum nível de acesso, portanto não conseguirão entrar.
+        </p>
+        
+        <ul class="user-list">
+            {% for pessoa in pessoas_sem_nivel %}
+            <li><span class="bullet" style="background-color: #d13438;"></span> {{ pessoa.nome_completo }} ({{ pessoa.tipo_usuario }})</li>
+            {% endfor %}
+            
+            {% if not pessoas_sem_nivel %}
+            <li style="color: #107c10;">Todos os usuários possuem nível de acesso configurado. ✅</li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+
+<script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        
+        // Esconde tudo
+        tabcontent = document.getElementsByClassName("tab-content-area");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        
+        // Tira classe active dos botões
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        
+        // Mostra o alvo
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+</script>
+
+{% endblock %}

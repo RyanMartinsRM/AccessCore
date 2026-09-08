@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Dispositivos - AccessCore{% endblock %}
+
+{% block content %}
+    <h1 class="content-header">Gerenciamento de Dispositivos</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}" style="padding: 15px; border-radius: 6px; color: white; font-weight: 500;
+                    background-color: {{ '#107c10' if category == 'success' else '#d13438' }}; 
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 10px;">
+                    <span>{{ '✅' if category == 'success' else '🚫' }}</span> {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="tab-navigation">
+        <a href="#controladoras" class="tab-link active">Controladoras</a>
+    </div>
+
+    <div class="tab-content" id="controladoras">
+        
+        <div style="display: flex; gap: 30px; flex-wrap: wrap;">
+            
+            <div style="flex: 1; min-width: 300px;">
+                <h3>Cadastrar Nova Controladora</h3>
+                
+                <form action="{{ url_for('dispositivos') }}" method="POST">
+                    
+                    <div class="form-group">
+                        <label for="nome_local">Nome / Local</label>
+                        <input type="text" id="nome_local" name="nome_local" class="form-control" placeholder="Ex: Portaria Social" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fabricante">Fabricante</label>
+                        <select id="fabricante" name="fabricante" class="form-control" onchange="atualizarModelos()" required>
+                            <option value="" selected disabled>Selecione o Fabricante...</option>
+                            {% if catalogo_equipamentos %}
+                                {% for marca in catalogo_equipamentos.keys() %}
+                                    <option value="{{ marca }}">{{ marca }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="">Erro ao carregar catálogo</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modelo">Modelo</label>
+                        <select id="modelo" name="modelo" class="form-control" required disabled>
+                            <option value="" selected disabled>Selecione primeiro o fabricante</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ip_address">Endereço IP</label>
+                        <input type="text" id="ip_address" name="ip_address" class="form-control" placeholder="Ex: 192.168.1.100">
+                    </div>
+                    
+                    <button type="submit" class="btn-primary" style="margin-top: 10px; width: 100%;">Salvar Dispositivo</button>
+                </form>
+            </div>
+
+            <div style="flex: 1.5; min-width: 400px;">
+                <h3>Dispositivos Cadastrados</h3>
+                
+                <div style="overflow-x: auto;">
+                    <table class="data-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Local</th>
+                                <th>Fabricante</th>
+                                <th>Modelo</th>
+                                <th>Endereço IP</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in dispositivos %}
+                            <tr>
+                                <td><strong>{{ d.nome_local }}</strong></td>
+                                <td>{{ d.fabricante or 'N/A' }}</td>
+                                <td>{{ d.modelo or 'N/A' }}</td>
+                                <td>{{ d.ip_address or 'N/A' }}</td>
+                                <td>
+                                    <span style="color: {{ 'green' if d.status == 'Online' else 'red' }}; font-weight: bold;">
+                                        {{ d.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('editar_dispositivo', id=d.id) }}" 
+                                       style="color: #0078d4; text-decoration: none; margin-right: 10px; font-weight: 500;">
+                                        Editar
+                                    </a>
+                                    <a href="{{ url_for('excluir_dispositivo', id=d.id) }}"
+                                       onclick="return confirm('Tem certeza que deseja excluir o dispositivo {{ d.nome_local }}?');"
+                                       style="color: #d13438; text-decoration: none; font-weight: 500;">
+                                        Excluir
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            
+                            {% if not dispositivos %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 20px;">Nenhum dispositivo cadastrado.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function atualizarModelos() {
+            const catalogo = {{ catalogo_equipamentos | tojson }};
+            const selectFabricante = document.getElementById("fabricante");
+            const selectModelo = document.getElementById("modelo");
+            const marcaSelecionada = selectFabricante.value;
+            
+            selectModelo.innerHTML = '<option value="" selected disabled>Selecione o Modelo...</option>';
+            
+            if (marcaSelecionada && catalogo[marcaSelecionada]) {
+                selectModelo.disabled = false;
+                catalogo[marcaSelecionada].forEach(function(modelo) {
+                    const option = document.createElement("option");
+                    option.value = modelo;
+                    option.text = modelo;
+                    selectModelo.appendChild(option);
+                });
+            } else {
+                selectModelo.disabled = true;
+                selectModelo.innerHTML = '<option value="" selected disabled>Selecione primeiro o fabricante</option>';
+            }
+        }
+    </script>
+{% endblock %}

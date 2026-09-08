@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Usuários - AccessCore{% endblock %}
+
+{% block content %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="margin-bottom: 20px;">
+            {% for category, message in messages %}
+                {% set bg_color = '#107c10' if category == 'success' else '#d13438' %}
+                {% set icon = '✅' if category == 'success' else '🚫' %}
+                <div style="
+                    background-color: {{ bg_color }}; 
+                    color: white; 
+                    padding: 15px; 
+                    border-radius: 6px; 
+                    font-weight: 500;
+                    display: flex; align-items: center; gap: 10px;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <span style="font-size: 1.2rem;">{{ icon }}</span> {{ message }}
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="card" style="padding: 25px; border-radius: 8px; min-height: 400px;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; gap: 15px; flex-wrap: wrap;">
+            <div style="flex-grow: 1; min-width: 250px;">
+                <input type="text" id="searchUser" class="form-control" placeholder="Buscar por nome..." onkeyup="filtrarUsuarios()" style="width: 100%;">
+            </div>
+            <button type="button" onclick="toggleForm()" 
+                    style="background-color: #0078d4; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                + Adicionar Usuário
+            </button>
+        </div>
+
+        <div id="form-cadastro" style="display: none; margin-bottom: 30px; padding: 20px; border: 1px solid var(--border-color); border-radius: 8px; background-color: var(--bg-body);">
+            <h3 style="margin-top: 0;">Novo Cadastro</h3>
+            <form action="{{ url_for('usuarios') }}" method="POST">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div>
+                        <label>Nome Completo</label>
+                        <input type="text" name="nome_completo" class="form-control" required>
+                    </div>
+                    <div>
+                        <label>Documento</label>
+                        <input type="text" name="documento" class="form-control">
+                    </div>
+                    <div>
+                        <label>Tipo de Usuário</label>
+                        <select name="tipo_usuario" class="form-control">
+                            <option value="Morador">Morador</option>
+                            <option value="Visitante">Visitante</option>
+                            <option value="Prestador">Prestador de Serviço</option>
+                            <option value="Funcionario">Funcionário</option>
+                            <option value="Veiculo">Veículo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Nível de Acesso</label>
+                        <select name="nivel_acesso_id" class="form-control">
+                            <option value="">-- Sem Nível --</option>
+                            {% for nivel in niveis_acesso %}
+                            <option value="{{ nivel.id }}">{{ nivel.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; text-align: right;">
+                    <button type="button" onclick="toggleForm()" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-primary); padding: 8px 15px; border-radius: 4px; cursor: pointer; margin-right: 10px;">Cancelar</button>
+                    <button type="submit" style="background-color: #107c10; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">Salvar</button>
+                </div>
+            </form>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table class="data-table" id="tabelaUsuarios" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background-color: rgba(0,0,0,0.1);">
+                        <th style="padding: 12px; text-align: left;">Nome</th>
+                        <th style="padding: 12px; text-align: left;">Documento</th>
+                        <th style="padding: 12px; text-align: left;">Tipo</th>
+                        <th style="padding: 12px; text-align: left;">Nível de Acesso</th>
+                        <th style="padding: 12px; text-align: left;">Situação</th>
+                        <th style="padding: 12px; text-align: left;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if moradores %}
+                        {% for morador in moradores %}
+                        <tr style="border-bottom: 1px solid var(--border-color);">
+                            <td style="padding: 12px; font-weight: bold;">{{ morador.nome_completo }}</td>
+                            <td style="padding: 12px;">{{ morador.documento or '-' }}</td>
+                            <td style="padding: 12px;">
+                                <span style="background-color: #28a745; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">
+                                    {{ morador.tipo_usuario }}
+                                </span>
+                            </td>
+                            <td style="padding: 12px;">
+                                {{ morador.nivel_acesso.nome if morador.nivel_acesso else 'Sem Nível' }}
+                            </td>
+                            <td style="padding: 12px;">
+                                {% if morador.nivel_acesso %}
+                                    <span style="color: #107c10; font-weight: bold;">● Ativo</span>
+                                {% else %}
+                                    <span style="color: #e3a008; font-weight: bold;">● Incompleto</span>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 12px;">
+                                <a href="{{ url_for('editar_usuario', id=morador.id) }}" 
+                                   style="color: #0078d4; text-decoration: none; margin-right: 10px; font-weight: 500;">
+                                   ✏️ Editar
+                                </a>
+                                <a href="{{ url_for('excluir_usuario', id=morador.id) }}" 
+                                   onclick="return confirm('Tem certeza que deseja excluir {{ morador.nome_completo }}?');"
+                                   style="color: #d13438; text-decoration: none; font-weight: 500;">
+                                   🗑️ Excluir
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 30px; color: var(--text-secondary);">
+                                Nenhum usuário encontrado no sistema.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm() {
+            const form = document.getElementById('form-cadastro');
+            form.style.display = (form.style.display === 'none') ? 'block' : 'none';
+        }
+
+        function filtrarUsuarios() {
+            const input = document.getElementById('searchUser');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('tabelaUsuarios');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                if (tr[i].getElementsByTagName('td').length < 2) continue;
+                const tdName = tr[i].getElementsByTagName('td')[0];
+                const tdDoc = tr[i].getElementsByTagName('td')[1];
+                if (tdName || tdDoc) {
+                    const txtName = tdName.textContent || tdName.innerText;
+                    const txtDoc = tdDoc.textContent || tdDoc.innerText;
+                    if (txtName.toLowerCase().indexOf(filter) > -1 || txtDoc.indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }       
+            }
+        }
+    </script>
+
+{% endblock %}

@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações - AccessCore{% endblock %}
+
+{% block content %}
+
+    <style>
+        /* Estilo das Abas */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .nav-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background-color: var(--hover-color);
+        }
+        .nav-tab.active {
+            color: #0078d4; /* Azul destaque */
+            border-bottom: 3px solid #0078d4;
+        }
+
+        /* Cards de Conteúdo */
+        .config-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .card-title {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        /* Grid para Níveis de Acesso (Lado a Lado) */
+        .levels-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr; /* Formulário menor, Tabela maior */
+            gap: 25px;
+        }
+
+        /* Grid para Customização (Responsivo) */
+        .custom-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .levels-grid { grid-template-columns: 1fr; }
+        }
+
+        .hint-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+    </style>
+
+    <h2 style="margin-bottom: 20px;">Configurações Gerais</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}" style="margin-bottom: 20px; padding: 10px; border-radius: 4px; 
+                    background-color: {{ '#d4edda' if category == 'success' else '#f8d7da' }}; 
+                    color: {{ '#155724' if category == 'success' else '#721c24' }}; border: 1px solid transparent;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="openTab(event, 'tab-niveis')">🛡️ Níveis de Acesso</button>
+        
+        {% if session.is_admin %}
+        <button class="nav-tab" onclick="openTab(event, 'tab-sistema')">⚙️ Sistema & Rótulos</button>
+        <button class="nav-tab" onclick="openTab(event, 'tab-operadores')">👥 Operadores</button>
+        {% endif %}
+    </div>
+
+    <div id="tab-niveis" class="tab-content-area">
+        <div class="levels-grid">
+            
+            <div class="config-card">
+                <h3 class="card-title">Cadastrar Novo Nível</h3>
+                <p class="hint-text" style="margin-bottom: 15px;">Crie grupos para limitar quem pode entrar onde.</p>
+                
+                <form action="{{ url_for('configuracoes') }}" method="POST">
+                    <input type="hidden" name="form_name" value="nivel_acesso">
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label>Nome do Nível</label>
+                        <input type="text" name="nome_nivel" class="form-control" placeholder="Ex: Funcionários Noite" required>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label>Descrição</label>
+                        <textarea name="desc_nivel" class="form-control" rows="3" placeholder="Ex: Acesso permitido apenas portaria social após as 18h"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; background-color: #0078d4; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">
+                        Salvar Nível
+                    </button>
+                </form>
+            </div>
+
+            <div class="config-card">
+                <h3 class="card-title">Níveis Cadastrados</h3>
+                <div style="overflow-x: auto;">
+                    <table class="data-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Descrição</th>
+                                <th>Dispositivos</th>
+                                <th style="text-align: right;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nivel in niveis_acesso %}
+                            <tr>
+                                <td style="font-weight: bold;">{{ nivel.nome }}</td>
+                                <td style="color: var(--text-secondary);">{{ nivel.descricao or '-' }}</td>
+                                <td>
+                                    <span style="background-color: #0078d4; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">
+                                        {{ nivel.dispositivos|length }}
+                                    </span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <a href="{{ url_for('editar_nivel_acesso', id=nivel.id) }}" style="color: #0078d4; text-decoration: none; margin-right: 10px;">Editar</a>
+                                    <a href="{{ url_for('excluir_nivel_acesso', id=nivel.id) }}" 
+                                       onclick="return confirm('Excluir nível {{ nivel.nome }}?');"
+                                       style="color: #d13438; text-decoration: none;">Excluir</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not niveis_acesso %}
+                            <tr><td colspan="4" style="text-align: center; padding: 20px;">Nenhum nível criado.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if session.is_admin %}
+    <div id="tab-sistema" class="tab-content-area" style="display: none;">
+        <div class="config-card">
+            <h3 class="card-title">Customização de Tipos de Usuários</h3>
+            <p class="hint-text" style="margin-bottom: 20px;">
+                Altere como o sistema chama os usuários. Ex: Em uma escola, troque "Morador" por "Aluno" e "Visitante" por "Pais".
+            </p>
+
+            <form action="{{ url_for('configuracoes') }}" method="POST">
+                <input type="hidden" name="form_name" value="customizacao">
+                
+                <div class="custom-grid">
+                    <div>
+                        <label>Rótulo para "Morador"</label>
+                        <input type="text" name="label_morador" class="form-control" value="{{ labels_atuais['morador'] }}">
+                    </div>
+                    <div>
+                        <label>Rótulo para "Visitante"</label>
+                        <input type="text" name="label_visitante" class="form-control" value="{{ labels_atuais['visitante'] }}">
+                    </div>
+                    <div>
+                        <label>Rótulo para "Prestador"</label>
+                        <input type="text" name="label_prestador" class="form-control" value="{{ labels_atuais['prestador'] }}">
+                    </div>
+                    <div>
+                        <label>Rótulo para "Veículo"</label>
+                        <input type="text" name="label_veiculo" class="form-control" value="{{ labels_atuais['veiculo'] }}">
+                    </div>
+                    <div>
+                        <label>Rótulo para "Funcionário"</label>
+                        <input type="text" name="label_funcionario" class="form-control" value="{{ labels_atuais['funcionario'] }}">
+                    </div>
+                </div>
+
+                <div style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 20px; text-align: right;">
+                    <button type="submit" class="btn-primary" style="background-color: #107c10; color: white; border: none; padding: 10px 25px; border-radius: 4px; cursor: pointer;">
+                        Salvar Customização
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="tab-operadores" class="tab-content-area" style="display: none;">
+        <div class="levels-grid">
+            
+            <div class="config-card">
+                <h3 class="card-title">Novo Operador</h3>
+                <p class="hint-text" style="margin-bottom: 15px;">Crie contas para quem vai operar o sistema.</p>
+                
+                <form action="{{ url_for('configuracoes') }}" method="POST" autocomplete="off">
+                    <input type="hidden" name="form_name" value="novo_operador">
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label>Nome Completo</label>
+                        <input type="text" name="nome_completo" class="form-control" placeholder="Ex: Fabrício Castro" required>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label>Usuário (Login)</label>
+                        <input type="text" name="username" class="form-control" placeholder="Ex: portaria01" required>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label>Senha</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+
+                    <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" name="is_admin" id="is_admin" style="width: auto;">
+                        <label for="is_admin" style="cursor: pointer; margin: 0;">É Administrador? (Acesso Total)</label>
+                    </div>
+
+                    <button type="submit" class="btn-primary" style="width: 100%; background-color: #0078d4; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">
+                        Criar Operador
+                    </button>
+                </form>
+            </div>
+
+            <div class="config-card">
+                <h3 class="card-title">Operadores Ativos</h3>
+                <div style="overflow-x: auto;">
+                    <table class="data-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>Nome</th>
+                                <th>Permissão</th>
+                                <th style="text-align: right;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for op in operadores %}
+                            <tr>
+                                <td style="font-weight: bold;">{{ op.username }}</td>
+                                <td style="color: var(--text-secondary);">{{ op.nome_completo }}</td>
+                                <td>
+                                    {% if op.is_admin %}
+                                        <span style="color: #107c10; font-weight: bold;">Admin 🛡️</span>
+                                    {% else %}
+                                        <span style="color: var(--text-secondary);">Operador</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: right;">
+                                    {% if op.id != session.operador_id %}
+                                    <a href="{{ url_for('excluir_operador', id=op.id) }}" 
+                                       onclick="return confirm('Tem certeza que deseja excluir o operador {{ op.username }}?');"
+                                       style="color: #d13438; text-decoration: none;">
+                                        Excluir
+                                    </a>
+                                    {% else %}
+                                    <span style="color: var(--text-secondary); font-size: 0.8rem;">(Você)</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            
+            // Esconde todos os conteúdos
+            tabcontent = document.getElementsByClassName("tab-content-area");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            
+            // Remove classe active de todos os botões
+            tablinks = document.getElementsByClassName("nav-tab");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            
+            // Mostra o atual e adiciona active
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+
+{% endblock %}

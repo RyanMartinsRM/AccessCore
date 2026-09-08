@@ -1,0 +1,251 @@
+/* static/css/fluent.css */
+
+/* Reset e Fonte Padrão (Chave para o visual Microsoft) */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f3f2f1; /* Cinza claro do Fluent */
+    color: #323130;
+    height: 100%;
+}
+
+/* --- Layout Principal (Base) --- */
+.main-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #ffffff; /* Painel lateral branco */
+    border-right: 1px solid #e1dfdd;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.sidebar-header {
+    padding: 24px 20px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #0078d4; /* Azul da Microsoft */
+    border-bottom: 1px solid #e1dfdd;
+}
+
+.nav-menu {
+    list-style-type: none;
+    padding: 0;
+    margin: 16px 0;
+}
+
+.nav-menu li a {
+    display: block;
+    padding: 12px 20px;
+    text-decoration: none;
+    color: #323130;
+    font-weight: 500;
+    border-left: 4px solid transparent; /* Indicador de ativação */
+}
+
+.nav-menu li a:hover {
+    background-color: #f3f2f1;
+}
+
+/* Marca a aba ativa */
+.nav-menu li a.active {
+    background-color: #e7f3ff;
+    color: #005a9e;
+    border-left-color: #0078d4;
+    font-weight: 600;
+}
+
+.content-area {
+    flex-grow: 1;
+    padding: 24px 32px;
+    overflow-y: auto;
+}
+
+.content-header {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    border-bottom: 1px solid #c8c6c4;
+    padding-bottom: 16px;
+}
+
+/* --- Tela de Login --- */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f3f2f1;
+}
+
+.login-box {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 360px;
+    text-align: center;
+}
+
+.login-box h1 {
+    color: #0078d4;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #c8c6c4;
+    border-radius: 4px;
+    box-sizing: border-box; /* Importante para o padding não quebrar o layout */
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #0078d4;
+    box-shadow: 0 0 0 2px rgba(0,120,212,0.3);
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #0078d4;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #005a9e;
+}
+
+/* --- Sub-abas (usadas em Usuários, Dispositivos, etc.) --- */
+.tab-navigation {
+    display: flex;
+    border-bottom: 2px solid #e1dfdd;
+    margin-bottom: 20px;
+}
+
+.tab-link {
+    padding: 10px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #605e5c;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px; /* Alinha com a borda principal */
+}
+
+.tab-link:hover {
+    background-color: #f3f2f1;
+    color: #323130;
+}
+
+.tab-link.active {
+    color: #0078d4;
+    font-weight: 600;
+    border-bottom-color: #0078d4;
+}
+
+/* Tabela (para dispositivos) */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.data-table th, .data-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e1dfdd;
+}
+
+.data-table th {
+    background-color: #f3f2f1;
+    font-weight: 600;
+}
+
+.data-table tr:hover {
+    background-color: #f3f2f1;
+}
+
+
+/* --- <<< NOVOS ESTILOS PARA O DASHBOARD >>> --- */
+
+/* Container dos cartões */
+.status-card-container {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os cartões quebrem a linha em telas menores */
+    gap: 20px; /* Espaço entre os cartões */
+}
+
+/* Estilo individual do cartão */
+.status-card {
+    flex: 1; /* Faz com que os cartões cresçam igualmente */
+    min-width: 180px; /* Largura mínima antes de quebrar a linha */
+    padding: 20px;
+    border-radius: 8px;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.status-card .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.status-card .card-value {
+    font-size: 40px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+/* Cores dos cartões (baseado na sua imagem) */
+.card-blue {
+    background-color: #0078d4; /* Azul Microsoft */
+}
+
+.card-purple {
+    background-color: #886ce4; /* Roxo */
+}
+
+.card-green {
+    background-color: #107c10; /* Verde */
+}
+
+.card-red {
+    background-color: #d83b01; /* Vermelho/Laranja */
+}
+
+.card-yellow {
+    background-color: #ffb900; /* Amarelo */
+    color: #323130; /* Texto escuro para melhor contraste */
+}

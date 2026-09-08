@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Sobre - AccessCore{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Hero Section: O topo da página */
+    .about-hero {
+        text-align: center;
+        padding: 40px 20px;
+        margin-bottom: 40px;
+        background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 120, 212, 0.3);
+    }
+    .about-hero h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+    .about-hero p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        max-width: 700px;
+        margin: 15px auto 0;
+    }
+
+    /* Grid de Cards */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+    }
+
+    /* Estilo dos Cards de Funcionalidade */
+    .feature-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 30px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+    /* Efeito ao passar o mouse */
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        border-color: #0078d4;
+    }
+    
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        display: inline-block;
+        padding: 10px;
+        background-color: var(--hover-color);
+        border-radius: 12px;
+    }
+
+    .feature-card h3 {
+        margin-top: 0;
+        color: var(--text-primary);
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+    }
+
+    .feature-card p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    /* Seção Técnica e Equipe */
+    .tech-section {
+        background-color: var(--bg-card);
+        border-top: 1px solid var(--border-color);
+        padding: 40px 20px;
+        border-radius: 8px;
+    }
+    
+    .tech-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .tech-tag {
+        background-color: var(--hover-color);
+        color: var(--text-primary);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        border: 1px solid var(--border-color);
+    }
+</style>
+
+<div class="about-hero">
+    <h1>AccessCore</h1>
+    <p>Sistema Inteligente de Gestão de Controle de Acesso</p>
+    <p style="font-size: 0.9rem; margin-top: 10px;">Versão 1.0.0 (Beta Acadêmico)</p>
+</div>
+
+<div class="features-grid">
+    
+    <div class="feature-card">
+        <div class="feature-icon">👥</div>
+        <h3>Gestão de Identidades</h3>
+        <p>
+            O AccessCore vai além de um simples cadastro. O módulo de gestão de usuários permite a criação de perfis detalhados para Moradores, Visitantes e Prestadores de Serviço. 
+            Cada perfil possui regras de negócio específicas, garantindo que os dados estejam sempre organizados e acessíveis para a operação de portaria.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">📟</div>
+        <h3>Integração de Hardware</h3>
+        <p>
+            Desenvolvido para ser agnóstico a fabricantes, o sistema suporta integração com as principais marcas do mercado, como <strong>ControlID, Hikvision e Intelbras</strong>. 
+            O gerenciamento centralizado permite monitorar o status online/offline dos dispositivos em tempo real, facilitando a manutenção preventiva.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">🛡️</div>
+        <h3>Segurança e Níveis de Acesso</h3>
+        <p>
+            A segurança é granular. O sistema permite a criação de "Níveis de Acesso" personalizados, definindo exatamente quais portas ou catracas cada grupo de usuários pode acessar.
+            Isso impede, por exemplo, que um visitante acesse áreas restritas da administração ou que prestadores entrem fora do horário comercial.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Relatórios e Auditoria</h3>
+        <p>
+            Rastreabilidade total. Todas as ações no sistema, desde um login de operador até a abertura de uma porta, são registradas em logs imutáveis. 
+            O módulo de relatórios oferece uma visão clara do fluxo de pessoas, essencial para tomadas de decisão e investigações de segurança.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">⚙️</div>
+        <h3>Customização Dinâmica</h3>
+        <p>
+            Cada ambiente é único. O AccessCore possui um painel administrativo que permite alterar a nomenclatura do sistema (ex: mudar "Morador" para "Aluno"). 
+            Isso torna o software versátil para atender condomínios residenciais, escolas, empresas corporativas ou indústrias.
+        </p>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">🌗</div>
+        <h3>Experiência do Usuário (UX)</h3>
+        <p>
+            Com uma interface moderna e responsiva, o sistema foi projetado pensando no conforto do operador. 
+            Inclui suporte nativo a <strong>Modo Escuro (Dark Mode)</strong> para reduzir a fadiga visual durante turnos noturnos e feedback visual instantâneo para todas as ações.
+        </p>
+    </div>
+</div>
+
+<div class="tech-section">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+        
+        <div>
+            <h3 style="margin-top: 0;">Tecnologias Utilizadas</h3>
+            <p>Este projeto foi desenvolvido aplicando conceitos de Engenharia de Software, Banco de Dados e Desenvolvimento Web Moderno.</p>
+            <div class="tech-tags">
+                <span class="tech-tag">Python 3</span>
+                <span class="tech-tag">Flask Framework</span>
+                <span class="tech-tag">SQLAlchemy (ORM)</span>
+                <span class="tech-tag">SQLite / SQL Server</span>
+                <span class="tech-tag">HTML5 & CSS3</span>
+                <span class="tech-tag">JavaScript (ES6)</span>
+                <span class="tech-tag">Chart.js</span>
+            </div>
+        </div>
+
+        <div>
+            <h3 style="margin-top: 0;">Desenvolvido Por</h3>
+            <p>Projeto acadêmico realizado pela equipe:</p>
+            <ul style="list-style: none; padding: 0; margin-top: 15px;">
+                <li style="margin-bottom: 10px; padding-left: 15px; border-left: 3px solid #0078d4;">
+                    <strong>Fabricio Castro</strong>
+                </li>
+                <li style="margin-bottom: 10px; padding-left: 15px; border-left: 3px solid #0078d4;">
+                    <strong>Ryan Martins</strong>
+                </li>
+                <li style="margin-bottom: 10px; padding-left: 15px; border-left: 3px solid #0078d4;">
+                    <strong>Guilherme Eduardo</strong>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

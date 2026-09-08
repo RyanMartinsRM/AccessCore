@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Dispositivo - AccessCore{% endblock %}
+
+{% block content %}
+
+<div class="card" style="
+    background-color: var(--bg-card); 
+    color: var(--text-primary);
+    max-width: 800px; 
+    margin: 0 auto; 
+    padding: 30px; 
+    border-radius: 8px; 
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px;">
+        <h2 style="margin: 0;">Editar Dispositivo</h2>
+        <a href="{{ url_for('dispositivos') }}" style="color: var(--text-secondary); text-decoration: none;">← Voltar</a>
+    </div>
+
+    <form action="{{ url_for('editar_dispositivo', id=dispositivo.id) }}" method="POST">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            
+            <div style="grid-column: span 2;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Nome / Local</label>
+                <input type="text" name="nome_local" class="form-control" value="{{ dispositivo.nome_local }}" required style="width: 100%;">
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Fabricante</label>
+                <select id="fabricante" name="fabricante" class="form-control" onchange="atualizarModelos()" required style="width: 100%;">
+                    <option value="" disabled>Selecione...</option>
+                    {% for marca in catalogo_equipamentos.keys() %}
+                        <option value="{{ marca }}" {% if dispositivo.fabricante == marca %}selected{% endif %}>{{ marca }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Modelo</label>
+                <select id="modelo" name="modelo" class="form-control" required style="width: 100%;">
+                    </select>
+            </div>
+
+            <div style="grid-column: span 2;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 500;">Endereço IP</label>
+                <input type="text" name="ip_address" class="form-control" value="{{ dispositivo.ip_address }}" required style="width: 100%;">
+            </div>
+
+        </div>
+
+        <div style="text-align: right; margin-top: 30px;">
+            <a href="{{ url_for('dispositivos') }}" style="margin-right: 15px; color: var(--text-secondary); text-decoration: none;">Cancelar</a>
+            <button type="submit" class="btn-primary" style="background-color: #0078d4; color: white; border: none; padding: 10px 30px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                Salvar Alterações
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    const catalogo = {{ catalogo_equipamentos | tojson }};
+    const modeloAtual = "{{ dispositivo.modelo }}"; // Pega o modelo salvo no banco
+
+    function atualizarModelos() {
+        const selectFabricante = document.getElementById("fabricante");
+        const selectModelo = document.getElementById("modelo");
+        const marcaSelecionada = selectFabricante.value;
+        
+        // Limpa opções
+        selectModelo.innerHTML = '<option value="" disabled>Selecione o Modelo...</option>';
+        
+        if (marcaSelecionada && catalogo[marcaSelecionada]) {
+            selectModelo.disabled = false;
+            
+            catalogo[marcaSelecionada].forEach(function(modelo) {
+                const option = document.createElement("option");
+                option.value = modelo;
+                option.text = modelo;
+                
+                // Se for o modelo que já estava salvo, marca como selecionado
+                if (modelo === modeloAtual) {
+                    option.selected = true;
+                }
+                
+                selectModelo.appendChild(option);
+            });
+        } else {
+            selectModelo.disabled = true;
+        }
+    }
+
+    // Roda a função ao carregar a página para preencher o modelo corretamente
+    window.onload = atualizarModelos;
+</script>
+
+{% endblock %}
